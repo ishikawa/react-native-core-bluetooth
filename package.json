@@ -1,6 +1,6 @@
 {
   "name": "react-native-core-bluetooth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React Native native module for accessing the Core Bluetooth framework on iOS.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
