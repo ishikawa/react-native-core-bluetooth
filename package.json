@@ -34,7 +34,7 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "bluetooth"
   ],
   "repository": "https://github.com/ishikawa/react-native-core-bluetooth",
   "author": "Takanori Ishikawa <takanori.ishikawa@gmail.com> (https://github.com/ishikawa)",
