@@ -6,7 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const RNCoreBluetooth = NativeModules.RNCoreBluetooth
+const CoreBluetooth = NativeModules.RNCoreBluetooth
   ? NativeModules.RNCoreBluetooth
   : new Proxy(
       {},
@@ -17,6 +17,16 @@ const RNCoreBluetooth = NativeModules.RNCoreBluetooth
       }
     );
 
+export const {
+  CBUUIDCharacteristicUserDescriptionString,
+  Constant1,
+  Constant2,
+}: {
+  CBUUIDCharacteristicUserDescriptionString: string;
+  Constant1: string;
+  Constant2: number;
+} = CoreBluetooth.getConstants();
+
 export function multiply(a: number, b: number): Promise<number> {
-  return RNCoreBluetooth.multiply(a, b);
+  return CoreBluetooth.multiply(a, b);
 }
