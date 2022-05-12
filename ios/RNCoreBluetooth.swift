@@ -17,7 +17,7 @@ class RNCoreBluetooth: NSObject, RCTBridgeModule {
 
   @objc(multiply:withB:withResolver:withRejecter:)
   func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-    resolve(a*b+11)
+    resolve(a*b)
   }
 
   // Export constants
