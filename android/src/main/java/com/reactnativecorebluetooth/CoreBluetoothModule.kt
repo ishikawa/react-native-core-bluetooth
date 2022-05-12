@@ -8,7 +8,7 @@ import com.facebook.react.bridge.Promise
 class CoreBluetoothModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     override fun getName(): String {
-        return "CoreBluetooth"
+        return "RNCoreBluetooth"
     }
 
     // Example method
