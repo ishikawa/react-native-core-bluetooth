@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-core-bluetooth';
+import {
+  multiply,
+  CBUUIDCharacteristicUserDescriptionString,
+  Constant1,
+  Constant2,
+} from 'react-native-core-bluetooth';
 
 export default function App() {
   const [result, setResult] = React.useState<number | undefined>();
@@ -13,6 +18,12 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Result: {result}</Text>
+      <Text>
+        CBUUIDCharacteristicUserDescriptionString:{' '}
+        {CBUUIDCharacteristicUserDescriptionString}
+      </Text>
+      <Text>Constant1: {Constant1}</Text>
+      <Text>Constant2: {Constant2}</Text>
     </View>
   );
 }
