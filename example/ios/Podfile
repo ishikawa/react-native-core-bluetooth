@@ -19,6 +19,8 @@ target 'example' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'react-native-core-bluetooth', :path => '../..'
+
   target 'exampleTests' do
     inherit! :complete
     # Pods for testing
