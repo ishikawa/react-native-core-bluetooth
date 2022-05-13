@@ -1,5 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
-
+export { PeripheralManager } from './PeripheralManager';
 const LINKING_ERROR =
   `The package 'react-native-core-bluetooth' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +

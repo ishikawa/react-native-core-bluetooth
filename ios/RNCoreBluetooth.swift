@@ -3,6 +3,32 @@ import CoreBluetooth
 
 @objc(RNCoreBluetooth)
 class RNCoreBluetooth: NSObject, RCTBridgeModule {
+  var peripheralManager: CBPeripheralManager!
+
+  @objc(createPeripheralManager:restoreIdentifier:)
+  func createPeripheralManager(showPowerAlert: Bool, restoreIdentifier: String?) {
+    var options = [String : Any]();
+    
+    options[CBPeripheralManagerOptionShowPowerAlertKey] = showPowerAlert
+    
+    if let restoreIdentifier = restoreIdentifier {
+      options[CBPeripheralManagerOptionRestoreIdentifierKey] = restoreIdentifier
+    }
+
+    peripheralManager = CBPeripheralManager(delegate: nil, queue: nil, options: options)
+  }
+  
+  @objc(startAdvertising:)
+  func startAdvertising(serviceUUIDs: [String]) {
+    let serviceUUIDs = serviceUUIDs.map({(uuid: String) -> CBUUID in CBUUID(string: uuid) })
+    peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey: serviceUUIDs])
+  }
+  
+  @objc
+  func stopAdvertising() {
+    peripheralManager.stopAdvertising()
+  }
+
   @objc
   static func moduleName() -> String! {
     "RNCoreBluetooth"
