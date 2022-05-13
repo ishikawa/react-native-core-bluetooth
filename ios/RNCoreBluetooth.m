@@ -6,7 +6,9 @@ RCT_EXTERN_METHOD(createPeripheralManager
                   : (BOOL)showPowerAlert restoreIdentifier
                   : (NSString *)restoreIdentifier)
 
-RCT_EXTERN_METHOD(startAdvertising:)
+RCT_EXTERN_METHOD(startAdvertising
+                  : (NSArray *)serviceUUIDs localName
+                  : (NSString *)localName)
 
 RCT_EXTERN_METHOD(stopAdvertising)
 

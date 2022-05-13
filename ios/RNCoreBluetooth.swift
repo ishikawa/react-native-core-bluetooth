@@ -7,7 +7,7 @@ class RNCoreBluetooth: NSObject, RCTBridgeModule {
 
   @objc(createPeripheralManager:restoreIdentifier:)
   func createPeripheralManager(showPowerAlert: Bool, restoreIdentifier: String?) {
-    var options = [String : Any]();
+    var options = [String : Any]()
     
     options[CBPeripheralManagerOptionShowPowerAlertKey] = showPowerAlert
     
@@ -18,10 +18,17 @@ class RNCoreBluetooth: NSObject, RCTBridgeModule {
     peripheralManager = CBPeripheralManager(delegate: nil, queue: nil, options: options)
   }
   
-  @objc(startAdvertising:)
-  func startAdvertising(serviceUUIDs: [String]) {
+  @objc(startAdvertising:localName:)
+  func startAdvertising(serviceUUIDs: [String], localName: String?) {
+    var advertisementData = [String : Any]()
     let serviceUUIDs = serviceUUIDs.map({(uuid: String) -> CBUUID in CBUUID(string: uuid) })
-    peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey: serviceUUIDs])
+
+    advertisementData[CBAdvertisementDataServiceUUIDsKey] = serviceUUIDs
+    if let localName = localName {
+      advertisementData[CBAdvertisementDataLocalNameKey] = localName
+    }
+
+    peripheralManager.startAdvertising(advertisementData)
   }
   
   @objc
