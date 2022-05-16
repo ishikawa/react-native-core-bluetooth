@@ -20,7 +20,7 @@ const withCoreBluetooth: ConfigPlugin<
     bluetoothPeripheralPermission?: string | false;
   } | void
 > = (c, { bluetoothAlwaysPermission, bluetoothPeripheralPermission } = {}) => {
-  // iOS only supported
+  // For iOS only
   return withInfoPlist(c, (config) => {
     if (bluetoothAlwaysPermission !== false) {
       config.modResults.NSBluetoothAlwaysUsageDescription =
@@ -28,10 +28,22 @@ const withCoreBluetooth: ConfigPlugin<
         config.modResults.NSBluetoothAlwaysUsageDescription ||
         BLUETOOTH_ALWAYS;
     }
+    // For apps with a deployment target of iOS 13 and later, use
+    // NSBluetoothAlwaysUsageDescription instead.
+    //
+    // For deployment targets earlier than iOS 13, add both
+    // NSBluetoothAlwaysUsageDescription and NSBluetoothPeripheralUsageDescription to
+    // your app’s Information Property List file. Devices running earlier
+    // versions of iOS rely on NSBluetoothPeripheralUsageDescription, while devices
+    // running later versions rely on NSBluetoothAlwaysUsageDescription.
     if (bluetoothPeripheralPermission !== false) {
       config.modResults.NSBluetoothPeripheralUsageDescription =
         bluetoothPeripheralPermission ||
         config.modResults.NSBluetoothPeripheralUsageDescription ||
+        // If NSBluetoothPeripheralUsageDescription is missing but
+        // NSBluetoothAlwaysUsageDescription is present, use it as the default value.
+        bluetoothAlwaysPermission ||
+        config.modResults.NSBluetoothAlwaysUsageDescription ||
         BLUETOOTH_PERIPHERAL_USAGE;
     }
     return config;
