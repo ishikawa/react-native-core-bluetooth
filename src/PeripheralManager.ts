@@ -46,12 +46,12 @@ export class PeripheralManager {
 
   constructor() {
     CoreBluetooth.createPeripheralManager(true, null);
+
+    console.debug('add listener: ', PeripheralManagerDidUpdateStateEvent);
     CoreBluetoothEventEmitter.addListener(
       PeripheralManagerDidUpdateStateEvent,
-      (event) => {
-        // @ts-ignore
-        // eslint-disable-next-line no-alert
-        alert(JSON.stringify(event));
+      (_event) => {
+        console.info(PeripheralManagerDidUpdateStateEvent, 'state update');
       }
     );
   }

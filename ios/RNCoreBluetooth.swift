@@ -1,5 +1,6 @@
 import Foundation
 import CoreBluetooth
+import os
 
 let PeripheralManagerDidUpdateStateEvent = "onPeripheralManagerDidUpdateState"
 
@@ -54,6 +55,14 @@ class RNCoreBluetooth: RCTEventEmitter {
   func stopAdvertising() {
     peripheralManager.stopAdvertising()
   }
+
+  @objc
+  func fireUpdateEvent() {
+    os_log("supportedEvents = %@", self.supportedEvents().description)
+    self.sendEvent(withName: PeripheralManagerDidUpdateStateEvent, body: [
+      "state": peripheralManager.state.rawValue,
+    ])
+  }
   
   @objc(peripheralManagerState:withRejecter:)
   func peripheralManagerState(resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
@@ -102,8 +111,11 @@ extension RNCoreBluetooth: CBPeripheralManagerDelegate {
      *  your app is allowed to use bluetooth
      */
     internal func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-      self.sendEvent(withName: PeripheralManagerDidUpdateStateEvent, body: [
-        "state": peripheral.state
-      ])
+      os_log("peripheralManagerDidUpdateState: state = %d, hasEventListeners = %@, PeripheralManagerDidUpdateStateEvent = %@", peripheral.state.rawValue, self.hasEventListeners.description, PeripheralManagerDidUpdateStateEvent)
+      if self.hasEventListeners {
+        self.sendEvent(withName: PeripheralManagerDidUpdateStateEvent, body: [
+          "state": peripheral.state.rawValue,
+        ])
+      }
     }
 }

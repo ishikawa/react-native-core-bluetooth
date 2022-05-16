@@ -22,4 +22,6 @@ RCT_EXTERN_METHOD(multiply
                   : (RCTPromiseResolveBlock)resolve withRejecter
                   : (RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(fireUpdateEvent)
+
 @end

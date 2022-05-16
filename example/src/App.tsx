@@ -5,23 +5,30 @@ import {
   CBUUIDCharacteristicUserDescriptionString,
   Constant1,
   PeripheralManager,
+  CoreBluetooth,
 } from 'react-native-core-bluetooth';
 
 export default function App() {
   const [result, setResult] = useState<number | undefined>();
-  const peripheralManagerRef = useRef<PeripheralManager>(
-    new PeripheralManager(),
-  );
+  const peripheralManagerRef = useRef<PeripheralManager | undefined>();
+
+  useEffect(() => {
+    if (!peripheralManagerRef.current) {
+      peripheralManagerRef.current = new PeripheralManager();
+    }
+  }, []);
 
   useEffect(() => {
     multiply(3, 7).then(setResult);
   }, []);
 
   const onPress = useCallback(async () => {
-    const state = await peripheralManagerRef.current.state();
-    console.log('state', state);
-    // @ts-ignore
-    alert(`state = ${state}`);
+    if (peripheralManagerRef.current) {
+      const state = await peripheralManagerRef.current.state();
+      console.log('peripheralManagerRef.current.state =', state);
+    }
+
+    CoreBluetooth.fireUpdateEvent();
   }, []);
 
   return (

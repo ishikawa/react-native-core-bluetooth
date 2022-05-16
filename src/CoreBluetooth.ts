@@ -53,6 +53,8 @@ export interface CoreBluetoothInterface {
   peripheralManagerState(): Promise<CBManagerState>;
 
   multiply(a: number, b: number): Promise<number>;
+
+  fireUpdateEvent(): void;
 }
 
 export const CoreBluetooth: CoreBluetoothInterface = CoreBluetoothModule;
