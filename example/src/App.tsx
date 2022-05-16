@@ -1,18 +1,25 @@
-import * as React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
-import {StyleSheet, View, Text} from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import {
   multiply,
   CBUUIDCharacteristicUserDescriptionString,
   Constant1,
   Constant2,
+  PeripheralManager,
 } from 'react-native-core-bluetooth';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [result, setResult] = useState<number | undefined>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     multiply(3, 7).then(setResult);
+  }, []);
+
+  const onPress = useCallback(() => {
+    alert(PeripheralManager);
+
+    new PeripheralManager();
   }, []);
 
   return (
@@ -24,6 +31,16 @@ export default function App() {
       </Text>
       <Text>Constant1: {Constant1}</Text>
       <Text>Constant2: {Constant2}</Text>
+      <TouchableOpacity
+        onPress={onPress}
+        style={{
+          marginTop: 6,
+          backgroundColor: 'gray',
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+        }}>
+        <Text>Test</Text>
+      </TouchableOpacity>
     </View>
   );
 }

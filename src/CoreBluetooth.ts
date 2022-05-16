@@ -29,10 +29,10 @@ export const {
 export interface CoreBluetoothInterface {
   createPeripheralManager(
     showPowerAlert: boolean,
-    restoreIdentifier?: string
+    restoreIdentifier: string | null
   ): void;
 
-  startAdvertising(serviceUUIDs: string[], localName?: string): void;
+  startAdvertising(serviceUUIDs: string[], localName: string | null): void;
 
   stopAdvertising(): void;
 

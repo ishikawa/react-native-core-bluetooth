@@ -14,14 +14,14 @@ export class PeripheralManager {
   #isAdvertising = false;
 
   constructor() {
-    CoreBluetooth.createPeripheralManager(true);
+    CoreBluetooth.createPeripheralManager(true, null);
   }
 
   /**
    * Advertises peripheral manager data.
    */
   startAdvertising(serviceUUIDs: string[], options?: AdvertisingOptions) {
-    CoreBluetooth.startAdvertising(serviceUUIDs, options?.localName);
+    CoreBluetooth.startAdvertising(serviceUUIDs, options?.localName ?? null);
     this.#isAdvertising = true;
   }
 
