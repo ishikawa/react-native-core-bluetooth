@@ -10,6 +10,10 @@ RCT_EXTERN_METHOD(startAdvertising
                   : (NSArray *)serviceUUIDs localName
                   : (NSString *)localName)
 
+RCT_EXTERN_METHOD(peripheralManagerState
+                  : (RCTPromiseResolveBlock)resolve withRejecter
+                  : (RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(stopAdvertising)
 
 RCT_EXTERN_METHOD(multiply

@@ -1,25 +1,27 @@
-import React, { useEffect, useState, useCallback } from 'react';
-
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import {
   multiply,
   CBUUIDCharacteristicUserDescriptionString,
   Constant1,
-  Constant2,
   PeripheralManager,
 } from 'react-native-core-bluetooth';
 
 export default function App() {
   const [result, setResult] = useState<number | undefined>();
+  const peripheralManagerRef = useRef<PeripheralManager>(
+    new PeripheralManager(),
+  );
 
   useEffect(() => {
     multiply(3, 7).then(setResult);
   }, []);
 
-  const onPress = useCallback(() => {
-    alert(PeripheralManager);
-
-    new PeripheralManager();
+  const onPress = useCallback(async () => {
+    const state = await peripheralManagerRef.current.state();
+    console.log('state', state);
+    // @ts-ignore
+    alert(`state = ${state}`);
   }, []);
 
   return (
@@ -30,7 +32,6 @@ export default function App() {
         {CBUUIDCharacteristicUserDescriptionString}
       </Text>
       <Text>Constant1: {Constant1}</Text>
-      <Text>Constant2: {Constant2}</Text>
       <TouchableOpacity
         onPress={onPress}
         style={{

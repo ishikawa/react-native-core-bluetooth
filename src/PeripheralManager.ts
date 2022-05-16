@@ -1,8 +1,39 @@
-import { CoreBluetooth } from './CoreBluetooth';
+import {
+  CBManagerState,
+  CoreBluetooth,
+  CoreBluetoothEventEmitter,
+  PeripheralManagerDidUpdateStateEvent,
+} from './CoreBluetooth';
 
 export type AdvertisingOptions = {
   localName?: string;
 };
+
+// The possible states of a Core Bluetooth manager.
+export type ManagerState =
+  | 'Unknown'
+  | 'Resetting'
+  | 'Unsupported'
+  | 'Unauthorized'
+  | 'PoweredOff'
+  | 'PoweredOn';
+
+function CBManagerStateToManagerState(value: CBManagerState): ManagerState {
+  switch (value) {
+    case CBManagerState.Unknown:
+      return 'Unknown';
+    case CBManagerState.Resetting:
+      return 'Resetting';
+    case CBManagerState.Unsupported:
+      return 'Unsupported';
+    case CBManagerState.Unauthorized:
+      return 'Unauthorized';
+    case CBManagerState.PoweredOff:
+      return 'PoweredOff';
+    case CBManagerState.PoweredOn:
+      return 'PoweredOn';
+  }
+}
 
 /**
  * CBPeripheralManager
@@ -15,6 +46,20 @@ export class PeripheralManager {
 
   constructor() {
     CoreBluetooth.createPeripheralManager(true, null);
+    CoreBluetoothEventEmitter.addListener(
+      PeripheralManagerDidUpdateStateEvent,
+      (event) => {
+        // @ts-ignore
+        // eslint-disable-next-line no-alert
+        alert(JSON.stringify(event));
+      }
+    );
+  }
+
+  async state(): Promise<ManagerState> {
+    return CoreBluetooth.peripheralManagerState().then(
+      CBManagerStateToManagerState
+    );
   }
 
   /**
