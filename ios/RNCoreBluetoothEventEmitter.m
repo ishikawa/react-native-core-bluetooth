@@ -13,15 +13,6 @@
 
 RCT_EXPORT_MODULE(CoreBluetoothEventEmitter);
 
-+ (BOOL)requiresMainQueueSetup {
-  return YES;
-}
-
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
-}
-
 RCT_EXPORT_METHOD(fireEvent:(id)body)
 {
   RCTLogInfo(@"Pretending to create an event with %@", body);
@@ -31,7 +22,5 @@ RCT_EXPORT_METHOD(fireEvent:(id)body)
 - (NSArray<NSString *> *)supportedEvents {
   return @[@"MyEvent"];
 }
-
-
 
 @end
