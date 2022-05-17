@@ -1,22 +1,12 @@
-import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
+import { NativeModules, Platform, NativeModule } from 'react-native';
 const LINKING_ERROR =
   `The package 'react-native-core-bluetooth' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const CoreBluetoothModule = NativeModules.RNCoreBluetooth
-  ? NativeModules.RNCoreBluetooth
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
-const CoreBluetoothEventEmitterModule = NativeModules.CoreBluetoothEventEmitter
-  ? NativeModules.CoreBluetoothEventEmitter
+const CoreBluetoothModule = NativeModules.CoreBluetooth
+  ? NativeModules.CoreBluetooth
   : new Proxy(
       {},
       {
@@ -27,16 +17,8 @@ const CoreBluetoothEventEmitterModule = NativeModules.CoreBluetoothEventEmitter
     );
 
 export const {
-  CBUUIDCharacteristicUserDescriptionString,
-  Constant1,
-  Constant2,
-  // Event names
   PeripheralManagerDidUpdateStateEvent,
 }: {
-  CBUUIDCharacteristicUserDescriptionString: string;
-  Constant1: string;
-  Constant2: number;
-  // Event names
   PeripheralManagerDidUpdateStateEvent: string;
 } = CoreBluetoothModule.getConstants();
 
@@ -50,8 +32,9 @@ export const CBManagerState = {
 } as const;
 export type CBManagerState = typeof CBManagerState[keyof typeof CBManagerState];
 
-export interface CoreBluetoothInterface {
+export interface CoreBluetoothInterface extends NativeModule {
   createPeripheralManager(
+    runInMainQueue: boolean,
     showPowerAlert: boolean,
     restoreIdentifier: string | null
   ): void;
@@ -61,10 +44,6 @@ export interface CoreBluetoothInterface {
   stopAdvertising(): void;
 
   peripheralManagerState(): Promise<CBManagerState>;
-
-  multiply(a: number, b: number): Promise<number>;
-
-  fireUpdateEvent(): void;
 }
 
 export interface CoreBluetoothEventEmitterInterface {
@@ -72,12 +51,3 @@ export interface CoreBluetoothEventEmitterInterface {
 }
 
 export const CoreBluetooth: CoreBluetoothInterface = CoreBluetoothModule;
-
-export const CoreBluetoothEventEmitter: CoreBluetoothEventEmitterInterface =
-  CoreBluetoothEventEmitterModule;
-
-const emitter = new NativeEventEmitter(CoreBluetoothEventEmitterModule);
-
-emitter.addListener('MyEvent', (value) => {
-  console.info('Event received with', value);
-});

@@ -1,4 +1,9 @@
-import { CBManagerState, CoreBluetooth } from './CoreBluetooth';
+import { NativeEventEmitter } from 'react-native';
+import {
+  CoreBluetooth,
+  CBManagerState,
+  PeripheralManagerDidUpdateStateEvent,
+} from './CoreBluetooth';
 
 export type AdvertisingOptions = {
   localName?: string;
@@ -40,7 +45,17 @@ export class PeripheralManager {
   #isAdvertising = false;
 
   constructor() {
-    CoreBluetooth.createPeripheralManager(true, null);
+    CoreBluetooth.createPeripheralManager(false, true, null);
+    const emitter = new NativeEventEmitter(CoreBluetooth);
+
+    emitter.addListener(PeripheralManagerDidUpdateStateEvent, (event) => {
+      console.info(
+        'Event',
+        PeripheralManagerDidUpdateStateEvent,
+        'received with',
+        event
+      );
+    });
   }
 
   async state(): Promise<ManagerState> {
