@@ -1,9 +1,4 @@
-import {
-  CBManagerState,
-  CoreBluetooth,
-  CoreBluetoothEventEmitter,
-  PeripheralManagerDidUpdateStateEvent,
-} from './CoreBluetooth';
+import { CBManagerState, CoreBluetooth } from './CoreBluetooth';
 
 export type AdvertisingOptions = {
   localName?: string;
@@ -46,14 +41,6 @@ export class PeripheralManager {
 
   constructor() {
     CoreBluetooth.createPeripheralManager(true, null);
-
-    console.debug('add listener: ', PeripheralManagerDidUpdateStateEvent);
-    CoreBluetoothEventEmitter.addListener(
-      PeripheralManagerDidUpdateStateEvent,
-      (_event) => {
-        console.info(PeripheralManagerDidUpdateStateEvent, 'state update');
-      }
-    );
   }
 
   async state(): Promise<ManagerState> {

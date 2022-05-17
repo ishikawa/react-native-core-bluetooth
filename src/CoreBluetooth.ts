@@ -1,4 +1,4 @@
-import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
+import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
 const LINKING_ERROR =
   `The package 'react-native-core-bluetooth' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
@@ -7,6 +7,16 @@ const LINKING_ERROR =
 
 const CoreBluetoothModule = NativeModules.RNCoreBluetooth
   ? NativeModules.RNCoreBluetooth
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
+const CoreBluetoothEventEmitterModule = NativeModules.CoreBluetoothEventEmitter
+  ? NativeModules.CoreBluetoothEventEmitter
   : new Proxy(
       {},
       {
@@ -57,8 +67,17 @@ export interface CoreBluetoothInterface {
   fireUpdateEvent(): void;
 }
 
+export interface CoreBluetoothEventEmitterInterface {
+  fireEvent(body: string): void;
+}
+
 export const CoreBluetooth: CoreBluetoothInterface = CoreBluetoothModule;
 
-export const CoreBluetoothEventEmitter = new NativeEventEmitter(
-  CoreBluetoothModule
-);
+export const CoreBluetoothEventEmitter: CoreBluetoothEventEmitterInterface =
+  CoreBluetoothEventEmitterModule;
+
+const emitter = new NativeEventEmitter(CoreBluetoothEventEmitterModule);
+
+emitter.addListener('MyEvent', (value) => {
+  console.info('Event received with', value);
+});

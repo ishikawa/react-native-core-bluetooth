@@ -5,7 +5,7 @@ import {
   CBUUIDCharacteristicUserDescriptionString,
   Constant1,
   PeripheralManager,
-  CoreBluetooth,
+  CoreBluetoothEventEmitter,
 } from 'react-native-core-bluetooth';
 
 export default function App() {
@@ -28,7 +28,7 @@ export default function App() {
       console.log('peripheralManagerRef.current.state =', state);
     }
 
-    CoreBluetooth.fireUpdateEvent();
+    CoreBluetoothEventEmitter.fireEvent('hello');
   }, []);
 
   return (

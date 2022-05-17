@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DF7EDD028327916009E41F2 /* RNCoreBluetoothEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF7EDCF28327916009E41F2 /* RNCoreBluetoothEventEmitter.m */; };
 		F4FF95D7245B92E800C19C63 /* RNCoreBluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* RNCoreBluetooth.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DF7EDCE28327916009E41F2 /* RNCoreBluetoothEventEmitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCoreBluetoothEventEmitter.h; sourceTree = "<group>"; };
+		0DF7EDCF28327916009E41F2 /* RNCoreBluetoothEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetoothEventEmitter.m; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRNCoreBluetooth.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCoreBluetooth.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5891CC2AC0600A0062D /* RNCoreBluetooth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetooth.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreBluetooth-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -51,6 +54,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				0DF7EDCE28327916009E41F2 /* RNCoreBluetoothEventEmitter.h */,
+				0DF7EDCF28327916009E41F2 /* RNCoreBluetoothEventEmitter.m */,
 				F4FF95D6245B92E800C19C63 /* RNCoreBluetooth.swift */,
 				B3E7B5891CC2AC0600A0062D /* RNCoreBluetooth.m */,
 				F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */,
@@ -115,6 +120,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DF7EDD028327916009E41F2 /* RNCoreBluetoothEventEmitter.m in Sources */,
 				F4FF95D7245B92E800C19C63 /* RNCoreBluetooth.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
