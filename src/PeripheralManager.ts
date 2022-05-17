@@ -5,6 +5,17 @@ import {
   PeripheralManagerDidUpdateStateEvent,
 } from './CoreBluetooth';
 
+export interface IEventSubscription {
+  /**
+   * Removes this subscription from the subscriber that controls it.
+   */
+  remove(): void;
+}
+
+export interface IStateChangeListener {
+  (state: ManagerState): void;
+}
+
 export type AdvertisingOptions = {
   localName?: string;
 };
@@ -44,24 +55,33 @@ function CBManagerStateToManagerState(value: CBManagerState): ManagerState {
 export class PeripheralManager {
   #isAdvertising = false;
 
+  #emitter = new NativeEventEmitter(CoreBluetooth);
+
   constructor() {
     CoreBluetooth.createPeripheralManager(false, true, null);
-    const emitter = new NativeEventEmitter(CoreBluetooth);
-
-    emitter.addListener(PeripheralManagerDidUpdateStateEvent, (event) => {
-      console.info(
-        'Event',
-        PeripheralManagerDidUpdateStateEvent,
-        'received with',
-        event
-      );
-    });
   }
 
   async state(): Promise<ManagerState> {
-    return CoreBluetooth.peripheralManagerState().then(
-      CBManagerStateToManagerState
+    const value = await CoreBluetooth.peripheralManagerState();
+    return CBManagerStateToManagerState(value);
+  }
+
+  onStateChange(listener: IStateChangeListener): IEventSubscription {
+    const subscription = this.#emitter.addListener(
+      PeripheralManagerDidUpdateStateEvent,
+      (event) => {
+        console.debug(
+          'Event',
+          PeripheralManagerDidUpdateStateEvent,
+          'received with',
+          event
+        );
+        const state = CBManagerStateToManagerState(event.state);
+        listener(state);
+      }
     );
+
+    return subscription;
   }
 
   /**

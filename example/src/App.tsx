@@ -8,7 +8,20 @@ export default function App() {
   useEffect(() => {
     if (!peripheralManagerRef.current) {
       peripheralManagerRef.current = new PeripheralManager();
+
+      const subscription = peripheralManagerRef.current.onStateChange(
+        (state) => {
+          console.info('state changed:', state);
+        },
+      );
+
+      return function unsubscribe() {
+        console.info('Remove subscription...');
+        subscription.remove();
+      };
     }
+
+    return;
   }, []);
 
   const onPress = useCallback(async () => {
