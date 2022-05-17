@@ -18,8 +18,10 @@ const CoreBluetoothModule = NativeModules.CoreBluetooth
 
 export const {
   PeripheralManagerDidUpdateStateEvent,
+  PeripheralManagerCentralDidSubscribeToCharacteristic,
 }: {
   PeripheralManagerDidUpdateStateEvent: string;
+  PeripheralManagerCentralDidSubscribeToCharacteristic: string;
 } = CoreBluetoothModule.getConstants();
 
 export const CBManagerState = {

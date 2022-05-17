@@ -1,8 +1,22 @@
 #import "RNCoreBluetooth.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 
-static NSString *const RNCoreBluetoothPeripheralManagerDidUpdateStateEvent =
+#pragma mark Event names
+
+static NSString *const RNCoreBluetoothPeripheralManagerDidUpdateState =
     @"onPeripheralManagerDidUpdateState";
+
+static NSString
+    *const RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic =
+        @"onPeripheralManagerCentralDidSubscribeToCharacteristic";
+
+static NSString *const
+    RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic =
+        @"onPeripheralManagerCentralDidUnsubscribeFromCharacteristic";
+
+static NSString
+    *const RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers =
+        @"onPeripheralManagerIsReadyToUpdateSubscribers";
 
 @interface RNCoreBluetooth (CBPeripheralManagerDelegate) <
     CBPeripheralManagerDelegate>
@@ -41,7 +55,7 @@ RCT_EXPORT_METHOD(createPeripheralManager
 RCT_EXPORT_METHOD(peripheralManagerState
                   : (RCTPromiseResolveBlock)resolve withRejecter
                   : (RCTPromiseRejectBlock)reject) {
-  resolve([NSNumber numberWithInteger:[_peripheralManager state]]);
+  resolve(@(_peripheralManager.state));
 }
 
 RCT_EXPORT_METHOD(startAdvertising
@@ -108,14 +122,25 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 - (NSDictionary *)constantsToExport {
   return @{
     @"PeripheralManagerDidUpdateStateEvent" :
-        RNCoreBluetoothPeripheralManagerDidUpdateStateEvent,
+        RNCoreBluetoothPeripheralManagerDidUpdateState,
+    @"PeripheralManagerCentralDidSubscribeToCharacteristic" :
+        RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic,
+    @"PeripheralManagerCentralDidUnsubscribeFromCharacteristic" :
+        RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+    @"PeripheralManagerIsReadyToUpdateSubscribers" :
+        RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers,
   };
 }
 
 #pragma mark EventEmitter
 
 - (NSArray<NSString *> *)supportedEvents {
-  return @[ RNCoreBluetoothPeripheralManagerDidUpdateStateEvent ];
+  return @[
+    RNCoreBluetoothPeripheralManagerDidUpdateState,
+    RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic,
+    RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+    RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers,
+  ];
 }
 
 - (void)dispatchEventWithName:(nonnull NSString *)name body:(nonnull id)body {
@@ -134,29 +159,95 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 
 @end
 
+@implementation RNCoreBluetoothConvert
++ (id)central:(nonnull CBCentral *)central {
+  return @{
+    @"id" : central.identifier.UUIDString,
+    @"maximumUpdateValueLength" : @(central.maximumUpdateValueLength)
+  };
+}
+
++ (id)service:(nonnull CBService *)service {
+  return @{
+    @"id" : service.UUID.UUIDString,
+    @"isPrimary" : service.isPrimary,
+  };
+}
+
++ (id)characteristic:(nonnull CBCharacteristic *)characteristic {
+  return @{
+    @"id" : characteristic.UUID.UUIDString,
+    @"value" : characteristic.value,
+    @"service" : [self service:characteristic.service]
+  };
+}
+@end
+
 @implementation RNCoreBluetooth (CBPeripheralManagerDelegate)
 
-/*
- * Required protocol method.
- *
- * A full app should take care of all the possible
- * states, but we're just waiting for to know when the CBPeripheralManager is
- * ready
- *
- * Starting from iOS 13.0, if the state is CBManagerStateUnauthorized, you
- * are also required to check for the authorization state of the peripheral to
- * ensure that your app is allowed to use bluetooth
- */
+// Required protocol method.
+//
+// A full app should take care of all the possible
+// states, but we're just waiting for to know when the CBPeripheralManager is
+// ready
+//
+// Starting from iOS 13.0, if the state is CBManagerStateUnauthorized, you
+// are also required to check for the authorization state of the peripheral to
+// ensure that your app is allowed to use bluetooth
 - (void)peripheralManagerDidUpdateState:
     (nonnull CBPeripheralManager *)peripheral {
   NSLog(@"peripheralManagerDidUpdateState: state = %ld, hasEventListeners = %d",
-        (long)[peripheral state], _hasEventListeners);
+        (long)peripheral.state, _hasEventListeners);
+  [self dispatchEventWithName:RNCoreBluetoothPeripheralManagerDidUpdateState
+                         body:@{@"state" : @(peripheral.state)}];
+}
+
+// Tells the delegate that a remote central device subscribed to a
+// characteristic’s value.
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+                         central:(CBCentral *)central
+    didSubscribeToCharacteristic:(CBCharacteristic *)characteristic {
+  NSLog(@"peripheralManager:central:didSubscribeToCharacteristic: central = "
+        @"%@, characteristic = %@",
+        central.identifier.UUIDString, characteristic.UUID.UUIDString);
   [self
-      dispatchEventWithName:RNCoreBluetoothPeripheralManagerDidUpdateStateEvent
+      dispatchEventWithName:
+          RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
                        body:@{
-                         @"state" :
-                             [NSNumber numberWithInteger:[peripheral state]]
+                         @"central" : [RNCoreBluetoothConvert central:central],
+                         @"characteristic" : [RNCoreBluetoothConvert
+                             characteristic:characteristic]
                        }];
 }
 
+// Tells the delegate that a remote central device unsubscribed from a
+// characteristic’s value.
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+                             central:(CBCentral *)central
+    didUnsubscribeFromCharacteristic:(CBCharacteristic *)characteristic {
+  NSLog(
+      @"peripheralManager:central:didUnsubscribeFromCharacteristic: central = "
+      @"%@, characteristic = %@",
+      central.identifier.UUIDString, characteristic.UUID.UUIDString);
+  [self
+      dispatchEventWithName:
+          RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
+                       body:@{
+                         @"central" : [RNCoreBluetoothConvert central:central],
+                         @"characteristic" : [RNCoreBluetoothConvert
+                             characteristic:characteristic]
+                       }];
+}
+
+// This callback comes in when the PeripheralManager is ready to send the next
+// chunk of data. This is to ensure that packets will arrive in the order they
+// are sent
+- (void)peripheralManagerIsReadyToUpdateSubscribers:
+    (CBPeripheralManager *)peripheral {
+  NSLog(@"peripheralManagerIsReadyToUpdateSubscribers: peripheral = %@",
+        peripheral.identifier.UUIDString);
+  [self dispatchEventWithName:
+            RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers
+                         body:@{}];
+}
 @end
