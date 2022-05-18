@@ -25,6 +25,7 @@
 /* Begin PBXFileReference section */
 		0DF0D44E28333F3D00405428 /* RNCoreBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCoreBluetooth.h; sourceTree = "<group>"; };
 		0DF0D44F28333F3D00405428 /* RNCoreBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetooth.m; sourceTree = "<group>"; };
+		0DF0D477283469C100405428 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		134814201AA4EA6300B7C361 /* libRNCoreBluetooth.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCoreBluetooth.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreBluetooth-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -40,6 +41,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0DF0D476283469C100405428 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0DF0D477283469C100405428 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -55,6 +64,7 @@
 				0DF0D44F28333F3D00405428 /* RNCoreBluetooth.m */,
 				F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				0DF0D476283469C100405428 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -218,6 +228,8 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -238,6 +250,8 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,

@@ -66,6 +66,17 @@ export class PeripheralManager {
     return CBManagerStateToManagerState(value);
   }
 
+  /**
+   * Tells the listener the peripheral manager’s state updated.
+   *
+   * Before you call PeripheralManager methods, the peripheral manager object must be in
+   * the powered-on state, as indicated by the `ManagerState.PoweredOn`.
+   * This state indicates that the device (your iPhone or iPad, for instance) supports
+   * Bluetooth low energy and that its Bluetooth is on and available for use.
+   *
+   * @param listener A callback.
+   * @returns An event subscription.
+   */
   onStateChange(listener: IStateChangeListener): IEventSubscription {
     const subscription = this.#emitter.addListener(
       PeripheralManagerDidUpdateStateEvent,

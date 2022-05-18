@@ -18,6 +18,12 @@ static NSString
     *const RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers =
         @"onPeripheralManagerIsReadyToUpdateSubscribers";
 
+static NSString *const RNCoreBluetoothPeripheralManagerDidReceiveReadRequest =
+    @"onPeripheralManagerDidReceiveReadRequest";
+
+static NSString *const RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests =
+    @"onPeripheralManagerDidReceiveWriteRequests";
+
 @interface RNCoreBluetooth (CBPeripheralManagerDelegate) <
     CBPeripheralManagerDelegate>
 @end
@@ -66,10 +72,10 @@ RCT_EXPORT_METHOD(startAdvertising
 
   // CBAdvertisementDataServiceUUIDsKey
   NSMutableArray *serviceCBUUIDs =
-      [NSMutableArray arrayWithCapacity:[serviceUUIDs count]];
+      [NSMutableArray arrayWithCapacity:serviceUUIDs.count];
 
   [serviceUUIDs enumerateObjectsUsingBlock:^(NSString *uuidString,
-                                             NSUInteger idx, BOOL *stop) {
+                                             NSUInteger _idx, BOOL *_stop) {
     [serviceCBUUIDs addObject:[CBUUID UUIDWithString:uuidString]];
   }];
 
@@ -129,6 +135,10 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
         RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic,
     @"PeripheralManagerIsReadyToUpdateSubscribers" :
         RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers,
+    @"PeripheralManagerDidReceiveReadRequest" :
+        RNCoreBluetoothPeripheralManagerDidReceiveReadRequest,
+    @"PeripheralManagerDidReceiveWriteRequests" :
+        RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests
   };
 }
 
@@ -140,6 +150,8 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
     RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic,
     RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic,
     RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers,
+    RNCoreBluetoothPeripheralManagerDidReceiveReadRequest,
+    RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests,
   ];
 }
 
@@ -159,6 +171,13 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 
 @end
 
+@interface RNCoreBluetoothConvert : NSObject
++ (id)central:(nonnull CBCentral *)central;
++ (id)service:(nonnull CBService *)service;
++ (id)characteristic:(nonnull CBCharacteristic *)characteristic;
++ (id)request:(nonnull CBATTRequest *)request;
+@end
+
 @implementation RNCoreBluetoothConvert
 + (id)central:(nonnull CBCentral *)central {
   return @{
@@ -170,7 +189,7 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 + (id)service:(nonnull CBService *)service {
   return @{
     @"id" : service.UUID.UUIDString,
-    @"isPrimary" : service.isPrimary,
+    @"isPrimary" : @(service.isPrimary),
   };
 }
 
@@ -179,6 +198,16 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
     @"id" : characteristic.UUID.UUIDString,
     @"value" : characteristic.value,
     @"service" : [self service:characteristic.service]
+  };
+}
+
++ (id)request:(nonnull CBATTRequest *)request {
+  return @{
+    @"centralId" : request.central.identifier.UUIDString,
+    @"serviceId" : request.characteristic.service.UUID.UUIDString,
+    @"characteristicId" : request.characteristic.UUID.UUIDString,
+    @"value" : request.value,
+    @"offset" : @(request.offset),
   };
 }
 @end
@@ -244,10 +273,37 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 // are sent
 - (void)peripheralManagerIsReadyToUpdateSubscribers:
     (CBPeripheralManager *)peripheral {
-  NSLog(@"peripheralManagerIsReadyToUpdateSubscribers: peripheral = %@",
-        peripheral.identifier.UUIDString);
+  NSLog(@"peripheralManagerIsReadyToUpdateSubscribers:");
   [self dispatchEventWithName:
             RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers
                          body:@{}];
 }
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+    didReceiveReadRequest:(CBATTRequest *)request {
+  NSLog(@"peripheralManager:didReceiveReadRequest:");
+  [self dispatchEventWithName:
+            RNCoreBluetoothPeripheralManagerDidReceiveReadRequest
+                         body:@{
+                           @"request" : [RNCoreBluetoothConvert request:request]
+                         }];
+}
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+    didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
+  NSMutableArray *jsonRequests =
+      [NSMutableArray arrayWithCapacity:requests.count];
+
+  [requests enumerateObjectsUsingBlock:^(CBATTRequest *request, NSUInteger _idx,
+                                         BOOL *_stop) {
+    [jsonRequests addObject:[RNCoreBluetoothConvert request:request]];
+  }];
+
+  NSLog(@"peripheralManager:didReceiveWriteRequests: (%lu req)",
+        (unsigned long)requests.count);
+  [self dispatchEventWithName:
+            RNCoreBluetoothPeripheralManagerDidReceiveReadRequest
+                         body:@{@"requests" : jsonRequests}];
+}
+
 @end
