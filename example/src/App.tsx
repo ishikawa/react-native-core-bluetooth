@@ -1,48 +1,66 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useCallback, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Switch,
+} from 'react-native';
 import { PeripheralManager } from 'react-native-core-bluetooth';
+import type { ManagerState } from 'src/PeripheralManager';
+
+const SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
 
 export default function App() {
-  const peripheralManagerRef = useRef<PeripheralManager | undefined>();
+  const [manager] = useState(() => new PeripheralManager());
+  const [bleState, setBleState] = useState<ManagerState | undefined>();
+  const [isAdvertising, setIsAdvertising] = useState(false);
 
   useEffect(() => {
-    if (!peripheralManagerRef.current) {
-      peripheralManagerRef.current = new PeripheralManager();
+    console.debug('Subscribe BLE state change');
+    const subscription = manager.onStateChange((state) => {
+      console.info('state changed:', state);
+      setBleState(state);
+    });
 
-      const subscription = peripheralManagerRef.current.onStateChange(
-        (state) => {
-          console.info('state changed:', state);
-        },
-      );
+    return function unsubscribe() {
+      console.debug('Remove subscription...');
+      subscription.remove();
+    };
+  }, [manager]);
 
-      return function unsubscribe() {
-        console.info('Remove subscription...');
-        subscription.remove();
-      };
-    }
+  const onBleStatePress = useCallback(async () => {
+    const state = await manager.state();
+    Alert.alert('BLE state', `state = ${state}`);
+  }, [manager]);
 
-    return;
-  }, []);
-
-  const onPress = useCallback(async () => {
-    if (peripheralManagerRef.current) {
-      const state = await peripheralManagerRef.current.state();
-      Alert.alert('BLE state', `state = ${state}`);
-    }
-  }, []);
+  const onIsAdvertisingChange = useCallback(
+    (switchOn: boolean) => {
+      if (switchOn) {
+        manager.startAdvertising([SERVICE_UUID], { localName: 'example' });
+      } else {
+        manager.stopAdvertising();
+      }
+      setIsAdvertising(switchOn);
+    },
+    [manager],
+  );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={onPress}
-        style={{
-          marginTop: 6,
-          backgroundColor: 'gray',
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-        }}>
-        <Text>BLE state</Text>
-      </TouchableOpacity>
+      <View style={styles.row}>
+        <Text>BLE state = {bleState}</Text>
+      </View>
+      <View style={[styles.row, { flexDirection: 'row' }]}>
+        <Text style={{ lineHeight: 28, marginRight: 6 }}>Advertising</Text>
+        <Switch value={isAdvertising} onValueChange={onIsAdvertisingChange} />
+      </View>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={onBleStatePress} style={styles.button}>
+          <Text>BLE state</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -53,9 +71,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
+  row: {
+    marginVertical: 6,
+  },
+  button: {
+    backgroundColor: '#ccc',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 7,
   },
 });
