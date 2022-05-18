@@ -16,6 +16,12 @@ export interface IStateChangeListener {
   (state: ManagerState): void;
 }
 
+export type PeripheralManagerOptions = {
+  runInMainQueue?: boolean;
+  showPowerAlert?: boolean;
+  restoreIdentifier?: string | null;
+};
+
 export type AdvertisingOptions = {
   localName?: string;
 };
@@ -53,17 +59,32 @@ function CBManagerStateToManagerState(value: CBManagerState): ManagerState {
  * An object that manages and advertises peripheral services exposed by this app.
  */
 export class PeripheralManager {
-  #isAdvertising = false;
-
   #emitter = new NativeEventEmitter(CoreBluetooth);
 
-  constructor() {
-    CoreBluetooth.createPeripheralManager(false, true, null);
+  constructor(options: PeripheralManagerOptions = {}) {
+    CoreBluetooth.createPeripheralManager(
+      options.runInMainQueue ?? false,
+      options.showPowerAlert ?? true,
+      options.restoreIdentifier ?? null
+    );
   }
 
   async state(): Promise<ManagerState> {
-    const value = await CoreBluetooth.peripheralManagerState();
+    const value = await CoreBluetooth.state();
     return CBManagerStateToManagerState(value);
+  }
+
+  /**
+   * Returns `true` if the peripheral is advertising data.
+   *
+   * This value is `true` if the peripheral is advertising data as a result of
+   * successfully calling the `startAdvertising()` method. The value is `false`
+   * if the peripheral is no longer advertising its data.
+   *
+   * @returns A Boolean value that indicates whether the peripheral is advertising data.
+   */
+  isAdvertising(): Promise<boolean> {
+    return CoreBluetooth.isAdvertising();
   }
 
   /**
@@ -100,22 +121,9 @@ export class PeripheralManager {
    */
   startAdvertising(serviceUUIDs: string[], options?: AdvertisingOptions) {
     CoreBluetooth.startAdvertising(serviceUUIDs, options?.localName ?? null);
-    this.#isAdvertising = true;
   }
 
   stopAdvertising() {
     CoreBluetooth.stopAdvertising();
-    this.#isAdvertising = false;
-  }
-
-  /**
-   * A Boolean value that indicates whether the peripheral is advertising data.
-   *
-   * This value is `true` if the peripheral is advertising data as a result of
-   * successfully calling the `startAdvertising()` method. The value is `false`
-   * if the peripheral is no longer advertising its data.
-   */
-  get isAdvertising(): boolean {
-    return this.#isAdvertising;
   }
 }

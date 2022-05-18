@@ -45,7 +45,9 @@ export interface CoreBluetoothInterface extends NativeModule {
 
   stopAdvertising(): void;
 
-  peripheralManagerState(): Promise<CBManagerState>;
+  state(): Promise<CBManagerState>;
+
+  isAdvertising(): Promise<boolean>;
 }
 
 export interface CoreBluetoothEventEmitterInterface {

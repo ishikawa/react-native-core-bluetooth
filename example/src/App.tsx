@@ -10,13 +10,14 @@ import {
 import { PeripheralManager } from 'react-native-core-bluetooth';
 import type { ManagerState } from 'src/PeripheralManager';
 
-const SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
+const PERIPHERAL_SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
 
 export default function App() {
   const [manager] = useState(() => new PeripheralManager());
   const [bleState, setBleState] = useState<ManagerState | undefined>();
   const [isAdvertising, setIsAdvertising] = useState(false);
 
+  // Subscribe state change
   useEffect(() => {
     console.debug('Subscribe BLE state change');
     const subscription = manager.onStateChange((state) => {
@@ -30,16 +31,32 @@ export default function App() {
     };
   }, [manager]);
 
+  // Initialize BLE state in UI
+  useEffect(() => {
+    if (bleState === undefined) {
+      manager.state().then((state) => setBleState(state));
+    }
+  }, [bleState, manager]);
+
   const onBleStatePress = useCallback(async () => {
     const state = await manager.state();
     Alert.alert('BLE state', `state = ${state}`);
   }, [manager]);
 
+  const onIsAdvertisingPress = useCallback(async () => {
+    const value = await manager.isAdvertising();
+    Alert.alert('BLE isAdvertising', `value = ${value}`);
+  }, [manager]);
+
   const onIsAdvertisingChange = useCallback(
     (switchOn: boolean) => {
       if (switchOn) {
-        manager.startAdvertising([SERVICE_UUID], { localName: 'example' });
+        console.debug('startAdvertising =', PERIPHERAL_SERVICE_UUID);
+        manager.startAdvertising([PERIPHERAL_SERVICE_UUID], {
+          localName: 'example',
+        });
       } else {
+        console.debug('stopAdvertising =', PERIPHERAL_SERVICE_UUID);
         manager.stopAdvertising();
       }
       setIsAdvertising(switchOn);
@@ -59,6 +76,11 @@ export default function App() {
       <View style={styles.row}>
         <TouchableOpacity onPress={onBleStatePress} style={styles.button}>
           <Text>BLE state</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={onIsAdvertisingPress} style={styles.button}>
+          <Text>isAdvertising</Text>
         </TouchableOpacity>
       </View>
     </View>

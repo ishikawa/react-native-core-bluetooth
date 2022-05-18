@@ -58,10 +58,16 @@ RCT_EXPORT_METHOD(createPeripheralManager
                                                              options:options];
 }
 
-RCT_EXPORT_METHOD(peripheralManagerState
+RCT_EXPORT_METHOD(state
                   : (RCTPromiseResolveBlock)resolve withRejecter
                   : (RCTPromiseRejectBlock)reject) {
   resolve(@(_peripheralManager.state));
+}
+
+RCT_EXPORT_METHOD(isAdvertising
+                  : (RCTPromiseResolveBlock)resolve withRejecter
+                  : (RCTPromiseRejectBlock)reject) {
+  resolve(@(_peripheralManager.isAdvertising));
 }
 
 RCT_EXPORT_METHOD(startAdvertising
@@ -79,7 +85,7 @@ RCT_EXPORT_METHOD(startAdvertising
     [serviceCBUUIDs addObject:[CBUUID UUIDWithString:uuidString]];
   }];
 
-  advertisementData[CBAdvertisementDataServiceUUIDsKey] = serviceUUIDs;
+  advertisementData[CBAdvertisementDataServiceUUIDsKey] = serviceCBUUIDs;
 
   // CBAdvertisementDataLocalNameKey
   if (localName) {
