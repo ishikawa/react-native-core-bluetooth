@@ -34,7 +34,44 @@ export const CBManagerState = {
 } as const;
 export type CBManagerState = typeof CBManagerState[keyof typeof CBManagerState];
 
-export interface CoreBluetoothInterface extends NativeModule {
+export const CBCharacteristicProperty = {
+  Broadcast: 0x01,
+  Read: 0x02,
+  WriteWithoutResponse: 0x04,
+  Write: 0x08,
+  Notify: 0x10,
+  Indicate: 0x20,
+  AuthenticatedSignedWrites: 0x40,
+  ExtendedProperties: 0x80,
+  NotifyEncryptionRequired: 0x100,
+  IndicateEncryptionRequired: 0x200,
+} as const;
+export type CBCharacteristicProperty =
+  typeof CBCharacteristicProperty[keyof typeof CBCharacteristicProperty];
+
+export const CBAttributePermission = {
+  Readable: 0x01,
+  Writeable: 0x02,
+  ReadEncryptionRequired: 0x04,
+  WriteEncryptionRequired: 0x08,
+} as const;
+export type CBAttributePermission =
+  typeof CBAttributePermission[keyof typeof CBAttributePermission];
+
+export interface CBService {
+  uuid: string;
+  isPrimary: boolean;
+  characteristics: CBCharacteristic[] | null;
+}
+
+export interface CBCharacteristic {
+  uuid: string;
+  value: string | null; // base64 encoded
+  properties: CBCharacteristicProperty[];
+  permissions: CBAttributePermission[];
+}
+
+export interface ICoreBluetooth extends NativeModule {
   createPeripheralManager(
     runInMainQueue: boolean,
     showPowerAlert: boolean,
@@ -48,10 +85,8 @@ export interface CoreBluetoothInterface extends NativeModule {
   state(): Promise<CBManagerState>;
 
   isAdvertising(): Promise<boolean>;
+
+  addService(service: CBService): void;
 }
 
-export interface CoreBluetoothEventEmitterInterface {
-  fireEvent(body: string): void;
-}
-
-export const CoreBluetooth: CoreBluetoothInterface = CoreBluetoothModule;
+export const CoreBluetooth: ICoreBluetooth = CoreBluetoothModule;

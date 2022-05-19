@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0DF0D45028333F3D00405428 /* RNCoreBluetooth.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF0D44F28333F3D00405428 /* RNCoreBluetooth.m */; };
+		0DF0D47B2834FEB900405428 /* RNCoreBluetoothConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF0D47A2834FEB900405428 /* RNCoreBluetoothConvert.m */; };
+		0DF0D47E2835D4D200405428 /* RNCoreBluetoothUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DF0D47D2835D4D200405428 /* RNCoreBluetoothUtils.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,6 +28,10 @@
 		0DF0D44E28333F3D00405428 /* RNCoreBluetooth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCoreBluetooth.h; sourceTree = "<group>"; };
 		0DF0D44F28333F3D00405428 /* RNCoreBluetooth.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetooth.m; sourceTree = "<group>"; };
 		0DF0D477283469C100405428 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		0DF0D4792834FEB900405428 /* RNCoreBluetoothConvert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCoreBluetoothConvert.h; sourceTree = "<group>"; };
+		0DF0D47A2834FEB900405428 /* RNCoreBluetoothConvert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetoothConvert.m; sourceTree = "<group>"; };
+		0DF0D47C2835D4D200405428 /* RNCoreBluetoothUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNCoreBluetoothUtils.h; sourceTree = "<group>"; };
+		0DF0D47D2835D4D200405428 /* RNCoreBluetoothUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNCoreBluetoothUtils.m; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRNCoreBluetooth.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNCoreBluetooth.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreBluetooth-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -60,6 +66,10 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				0DF0D47C2835D4D200405428 /* RNCoreBluetoothUtils.h */,
+				0DF0D47D2835D4D200405428 /* RNCoreBluetoothUtils.m */,
+				0DF0D4792834FEB900405428 /* RNCoreBluetoothConvert.h */,
+				0DF0D47A2834FEB900405428 /* RNCoreBluetoothConvert.m */,
 				0DF0D44E28333F3D00405428 /* RNCoreBluetooth.h */,
 				0DF0D44F28333F3D00405428 /* RNCoreBluetooth.m */,
 				F4FF95D5245B92E700C19C63 /* CoreBluetooth-Bridging-Header.h */,
@@ -126,6 +136,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DF0D45028333F3D00405428 /* RNCoreBluetooth.m in Sources */,
+				0DF0D47B2834FEB900405428 /* RNCoreBluetoothConvert.m in Sources */,
+				0DF0D47E2835D4D200405428 /* RNCoreBluetoothUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

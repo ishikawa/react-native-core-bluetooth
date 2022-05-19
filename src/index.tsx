@@ -1,1 +1,6 @@
-export { PeripheralManager } from './PeripheralManager';
+export {
+  PeripheralManager,
+  Characteristic,
+  ManagerState,
+  Service,
+} from './PeripheralManager';

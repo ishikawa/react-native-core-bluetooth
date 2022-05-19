@@ -1,4 +1,6 @@
 #import "RNCoreBluetooth.h"
+#import "RNCoreBluetoothConvert.h"
+#import "RNCoreBluetoothUtils.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 
 #pragma mark Event names
@@ -97,6 +99,15 @@ RCT_EXPORT_METHOD(startAdvertising
 
 RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 
+RCT_EXPORT_METHOD(addService
+                  : (nonnull NSDictionary<NSString *, id> *)serviceDict) {
+  NSLog(@"addService:%@", serviceDict);
+
+  CBMutableService *service = [RNCoreBluetoothConvert jsToService:serviceDict];
+
+  [_peripheralManager addService:service];
+}
+
 #pragma mark React Native
 
 /**
@@ -177,47 +188,6 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 
 @end
 
-@interface RNCoreBluetoothConvert : NSObject
-+ (id)central:(nonnull CBCentral *)central;
-+ (id)service:(nonnull CBService *)service;
-+ (id)characteristic:(nonnull CBCharacteristic *)characteristic;
-+ (id)request:(nonnull CBATTRequest *)request;
-@end
-
-@implementation RNCoreBluetoothConvert
-+ (id)central:(nonnull CBCentral *)central {
-  return @{
-    @"id" : central.identifier.UUIDString,
-    @"maximumUpdateValueLength" : @(central.maximumUpdateValueLength)
-  };
-}
-
-+ (id)service:(nonnull CBService *)service {
-  return @{
-    @"id" : service.UUID.UUIDString,
-    @"isPrimary" : @(service.isPrimary),
-  };
-}
-
-+ (id)characteristic:(nonnull CBCharacteristic *)characteristic {
-  return @{
-    @"id" : characteristic.UUID.UUIDString,
-    @"value" : characteristic.value,
-    @"service" : [self service:characteristic.service]
-  };
-}
-
-+ (id)request:(nonnull CBATTRequest *)request {
-  return @{
-    @"centralId" : request.central.identifier.UUIDString,
-    @"serviceId" : request.characteristic.service.UUID.UUIDString,
-    @"characteristicId" : request.characteristic.UUID.UUIDString,
-    @"value" : request.value,
-    @"offset" : @(request.offset),
-  };
-}
-@end
-
 @implementation RNCoreBluetooth (CBPeripheralManagerDelegate)
 
 // Required protocol method.
@@ -249,9 +219,9 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
       dispatchEventWithName:
           RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
                        body:@{
-                         @"central" : [RNCoreBluetoothConvert central:central],
+                         @"central" : [RNCoreBluetoothConvert centralToJs:central],
                          @"characteristic" : [RNCoreBluetoothConvert
-                             characteristic:characteristic]
+                             characteristicToJs:characteristic]
                        }];
 }
 
@@ -268,9 +238,9 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
       dispatchEventWithName:
           RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
                        body:@{
-                         @"central" : [RNCoreBluetoothConvert central:central],
+                         @"central" : [RNCoreBluetoothConvert centralToJs:central],
                          @"characteristic" : [RNCoreBluetoothConvert
-                             characteristic:characteristic]
+                             characteristicToJs:characteristic]
                        }];
 }
 
@@ -291,7 +261,7 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
   [self dispatchEventWithName:
             RNCoreBluetoothPeripheralManagerDidReceiveReadRequest
                          body:@{
-                           @"request" : [RNCoreBluetoothConvert request:request]
+                           @"request" : [RNCoreBluetoothConvert requestToJs:request]
                          }];
 }
 
@@ -302,7 +272,7 @@ RCT_EXPORT_METHOD(stopAdvertising) { [_peripheralManager stopAdvertising]; }
 
   [requests enumerateObjectsUsingBlock:^(CBATTRequest *request, NSUInteger _idx,
                                          BOOL *_stop) {
-    [jsonRequests addObject:[RNCoreBluetoothConvert request:request]];
+    [jsonRequests addObject:[RNCoreBluetoothConvert requestToJs:request]];
   }];
 
   NSLog(@"peripheralManager:didReceiveWriteRequests: (%lu req)",

@@ -7,10 +7,35 @@ import {
   Alert,
   Switch,
 } from 'react-native';
-import { PeripheralManager } from 'react-native-core-bluetooth';
-import type { ManagerState } from 'src/PeripheralManager';
+import {
+  PeripheralManager,
+  Characteristic,
+  ManagerState,
+  Service,
+} from 'react-native-core-bluetooth';
 
 const PERIPHERAL_SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
+const PERIPHERAL_CHARACTERISTIC_UUID = '08590F7E-DB05-467E-8757-72F6FAEB13D4';
+
+function setUpService(manager: PeripheralManager) {
+  // Build our service.
+  console.debug('Build our service.');
+
+  // Start with the CBMutableCharacteristic.
+  const transferCharacteristic = new Characteristic(
+    PERIPHERAL_CHARACTERISTIC_UUID,
+    null,
+    {
+      properties: ['notify', 'writeWithoutResponse'],
+      permissions: ['readable', 'writeable'],
+    },
+  );
+  const transferService = new Service(PERIPHERAL_SERVICE_UUID, true);
+
+  transferService.characteristics = [transferCharacteristic];
+
+  manager.addService(transferService);
+}
 
 export default function App() {
   const [manager] = useState(() => new PeripheralManager());
@@ -35,6 +60,13 @@ export default function App() {
   useEffect(() => {
     if (bleState === undefined) {
       manager.state().then((state) => setBleState(state));
+    }
+  }, [bleState, manager]);
+
+  // Set up peripheral
+  useEffect(() => {
+    if (bleState === 'PoweredOn') {
+      setUpService(manager);
     }
   }, [bleState, manager]);
 
