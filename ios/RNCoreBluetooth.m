@@ -33,6 +33,15 @@ static NSString *const RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests =
 @implementation RNCoreBluetooth {
   BOOL _hasEventListeners;
   CBPeripheralManager *_peripheralManager;
+
+  // We track subscribed centrals to find a central
+  // when the peripheral writes data.
+  // identifier (uuid string) => CBCentral
+  NSMutableDictionary<NSString *, CBCentral *> *_subscribers;
+
+  // Published characteristics.
+  // UUID (string) => CBMutableCharacteristic
+  NSMutableDictionary<NSString *, CBMutableCharacteristic *> *_characteristics;
 }
 
 // RN bridge will populate it
@@ -58,6 +67,8 @@ RCT_EXPORT_METHOD(createPeripheralManager
   _peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self
                                                                queue:queue
                                                              options:options];
+  _subscribers = [[NSMutableDictionary alloc] init];
+  _characteristics = [[NSMutableDictionary alloc] init];
 }
 
 RCT_EXPORT_METHOD(state
@@ -105,7 +116,55 @@ RCT_EXPORT_METHOD(addService
 
   CBMutableService *service = [RNCoreBluetoothConvert jsToService:serviceDict];
 
+  for (CBMutableCharacteristic *c in service.characteristics) {
+    _characteristics[c.UUID.UUIDString] = c;
+  }
+
   [_peripheralManager addService:service];
+}
+
+/**
+ * Send an updated characteristic value to one or more subscribed centrals,
+ * using a notification or indication.
+ *
+ * @param value Base64 encoded string. The characteristic value you want to
+ *              send via a notification or indication.
+ * @param characteristicUUID The characteristic whose value has changed.
+ * @param centralUUIDs A list of centrals (represented by CBCentral objects)
+ * that have subscribed to receive updates of the characteristic’s value. If
+ * nil, the manager updates all subscribed centrals. The manager ignores any
+ * centrals that haven’t subscribed to the characteristic’s value.
+ *
+ * @return This value is YES if the update is successfully sent to the
+ * subscribed central or centrals. NO if the update isn’t successfully sent
+ * because the underlying transmit queue is full.
+ */
+RCT_EXPORT_METHOD(updateValue
+                  : (nonnull NSString *)value forCharacteristic
+                  : (nonnull NSString *)characteristicUUID onSubscribedCentrals
+                  : (nullable NSArray *)centralUUIDs withResolver
+                  : (RCTPromiseResolveBlock)resolve withRejecter
+                  : (RCTPromiseRejectBlock)reject) {
+  // centrals: search centrals from subscribers list.
+  NSMutableArray *centrals = nil;
+
+  if ([RNCoreBluetoothConvert nullableJsValue:centralUUIDs] != nil) {
+    centrals = [NSMutableArray arrayWithCapacity:centralUUIDs.count];
+
+    for (id uuid in centralUUIDs) {
+      CBCentral *central = _subscribers[uuid];
+
+      if (central != nil) {
+        [centrals addObject:central];
+      }
+    }
+  }
+
+  const BOOL ret =
+      [_peripheralManager updateValue:[RNCoreBluetoothConvert jsToData:value]
+                    forCharacteristic:_characteristics[characteristicUUID]
+                 onSubscribedCentrals:centrals];
+  resolve(@(ret));
 }
 
 #pragma mark React Native
@@ -215,6 +274,9 @@ RCT_EXPORT_METHOD(addService
   NSLog(@"peripheralManager:central:didSubscribeToCharacteristic: central = "
         @"%@, characteristic = %@",
         central.identifier.UUIDString, characteristic.UUID.UUIDString);
+
+  _subscribers[central.identifier.UUIDString] = central;
+
   [self dispatchEventWithName:
             RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
                          body:@{
@@ -234,6 +296,10 @@ RCT_EXPORT_METHOD(addService
       @"peripheralManager:central:didUnsubscribeFromCharacteristic: central = "
       @"%@, characteristic = %@",
       central.identifier.UUIDString, characteristic.UUID.UUIDString);
+
+  // Remove from subscribers.
+  [_subscribers removeObjectForKey:central.identifier.UUIDString];
+
   [self
       dispatchEventWithName:
           RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic

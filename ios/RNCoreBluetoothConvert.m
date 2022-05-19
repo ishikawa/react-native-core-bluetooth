@@ -10,6 +10,10 @@ static inline id nullableJsValue(id value) {
 
 @implementation RNCoreBluetoothConvert
 
++ (nullable id)nullableJsValue:(id)value {
+  return nullableJsValue(value);
+}
+
 #pragma mark JS -> Native
 
 + (CBCharacteristicProperties)jsToCharacteristicProperties:(id)numArray {

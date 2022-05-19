@@ -219,6 +219,34 @@ export class PeripheralManager {
         })) ?? null,
     });
   }
+
+  /**
+   * Send an updated characteristic value to one or more subscribed centrals,
+   * using a notification or indication.
+   *
+   * @param value The characteristic value you want to send via a notification or
+   *              indication.
+   * @param characteristicUUID The characteristic whose value has changed.
+   * @param centralUUIDs A UUID list of centrals that have subscribed to receive
+   *                     updates of the characteristic’s value. If null, the manager
+   *                     updates all subscribed centrals. The manager ignores any
+   *                     centrals that haven’t subscribed to the characteristic’s value.
+   *
+   * @return This value is `true` if the update is successfully sent to the subscribed
+   *         central or centrals. NO if the update isn’t successfully sent because
+   *         the underlying transmit queue is full.
+   */
+  updateValue(
+    value: Uint8Array,
+    characteristicUUID: string,
+    centralUUIDs?: string[] | null | undefined
+  ): Promise<boolean> {
+    return CoreBluetooth.updateValue(
+      Base64.fromByteArray(value),
+      characteristicUUID,
+      centralUUIDs ?? null
+    );
+  }
 }
 
 /**

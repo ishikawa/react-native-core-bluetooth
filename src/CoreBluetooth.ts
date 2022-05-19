@@ -91,6 +91,12 @@ export interface ICoreBluetooth extends NativeModule {
   isAdvertising(): Promise<boolean>;
 
   addService(service: CBService): void;
+
+  updateValue(
+    value: string,
+    characteristicUUID: string,
+    centralUUIDs: string[] | null
+  ): Promise<boolean>;
 }
 
 export const CoreBluetooth: ICoreBluetooth = CoreBluetoothModule;

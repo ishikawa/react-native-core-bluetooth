@@ -5,6 +5,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RNCoreBluetoothConvert : NSObject
 
+/**
+ * Returns `nil` if the value is `nil` or an instance of `NSNull`.
+ */
++ (nullable id)nullableJsValue:(id)value;
+
 #pragma mark JS -> Native
 
 + (BOOL)jsToBoolValue:(id)value;
