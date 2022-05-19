@@ -12,6 +12,7 @@ import {
   Characteristic,
   ManagerState,
   Service,
+  Central,
 } from 'react-native-core-bluetooth';
 
 const PERIPHERAL_SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
@@ -41,18 +42,49 @@ export default function App() {
   const [manager] = useState(() => new PeripheralManager());
   const [bleState, setBleState] = useState<ManagerState | undefined>();
   const [isAdvertising, setIsAdvertising] = useState(false);
+  const [subscribers, setSubscribers] = useState<Central[]>([]);
 
   // Subscribe state change
   useEffect(() => {
     console.debug('Subscribe BLE state change');
-    const subscription = manager.onStateChange((state) => {
+    const subscription1 = manager.onStateChange((state) => {
       console.info('state changed:', state);
       setBleState(state);
     });
+    const subscription2 = manager.onSubscribeToCharacteristic(
+      (central, serviceUUID, characteristicUUID) => {
+        console.info(
+          central.identifier,
+          'subscribed to characteristic',
+          characteristicUUID,
+          'for service',
+          serviceUUID,
+        );
+
+        setSubscribers((prevSubscribers) => [...prevSubscribers, central]);
+      },
+    );
+    const subscription3 = manager.onUnsubscribeFromCharacteristic(
+      (central, serviceUUID, characteristicUUID) => {
+        console.info(
+          central.identifier,
+          'unsubscribed from characteristic',
+          characteristicUUID,
+          'for service',
+          serviceUUID,
+        );
+
+        setSubscribers((prevSubscribers) =>
+          prevSubscribers.filter((c) => c.identifier !== central.identifier),
+        );
+      },
+    );
 
     return function unsubscribe() {
       console.debug('Remove subscription...');
-      subscription.remove();
+      subscription1.remove();
+      subscription2.remove();
+      subscription3.remove();
     };
   }, [manager]);
 
@@ -114,6 +146,14 @@ export default function App() {
         <TouchableOpacity onPress={onIsAdvertisingPress} style={styles.button}>
           <Text>isAdvertising</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <Text style={{ fontWeight: 'bold' }}>Connected subscribers</Text>
+        {subscribers.map((central) => (
+          <Text key={central.identifier}>
+            {central.identifier} ({central.maximumUpdateValueLength})
+          </Text>
+        ))}
       </View>
     </View>
   );

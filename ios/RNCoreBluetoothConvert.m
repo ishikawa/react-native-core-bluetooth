@@ -93,30 +93,30 @@ static inline id nullableJsValue(id value) {
 
 + (id)centralToJs:(nonnull CBCentral *)central {
   return @{
-    @"id" : central.identifier.UUIDString,
+    @"identifier" : central.identifier.UUIDString,
     @"maximumUpdateValueLength" : @(central.maximumUpdateValueLength)
   };
 }
 
 + (id)serviceToJs:(nonnull CBService *)service {
   return @{
-    @"id" : service.UUID.UUIDString,
+    @"UUID" : service.UUID.UUIDString,
     @"isPrimary" : @(service.isPrimary),
   };
 }
 
 + (id)characteristicToJs:(nonnull CBCharacteristic *)characteristic {
   return @{
-    @"id" : characteristic.UUID.UUIDString,
+    @"UUID" : characteristic.UUID.UUIDString,
     @"value" : characteristic.value ? [self dataToJs:characteristic.value]
                                     : [NSNull null],
-    @"service" : [self serviceToJs:characteristic.service]
+    @"serviceUUID" : characteristic.service.UUID.UUIDString,
   };
 }
 
 + (id)requestToJs:(nonnull CBATTRequest *)request {
   return @{
-    @"centralId" : request.central.identifier.UUIDString,
+    @"centralUUID" : request.central.identifier.UUIDString,
     @"serviceId" : request.characteristic.service.UUID.UUIDString,
     @"characteristicId" : request.characteristic.UUID.UUIDString,
     @"value" : request.value ? [self dataToJs:request.value] : [NSNull null],

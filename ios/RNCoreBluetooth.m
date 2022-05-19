@@ -215,14 +215,14 @@ RCT_EXPORT_METHOD(addService
   NSLog(@"peripheralManager:central:didSubscribeToCharacteristic: central = "
         @"%@, characteristic = %@",
         central.identifier.UUIDString, characteristic.UUID.UUIDString);
-  [self
-      dispatchEventWithName:
-          RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
-                       body:@{
-                         @"central" : [RNCoreBluetoothConvert centralToJs:central],
-                         @"characteristic" : [RNCoreBluetoothConvert
-                             characteristicToJs:characteristic]
-                       }];
+  [self dispatchEventWithName:
+            RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
+                         body:@{
+                           @"central" :
+                               [RNCoreBluetoothConvert centralToJs:central],
+                           @"characteristic" : [RNCoreBluetoothConvert
+                               characteristicToJs:characteristic]
+                         }];
 }
 
 // Tells the delegate that a remote central device unsubscribed from a
@@ -236,9 +236,10 @@ RCT_EXPORT_METHOD(addService
       central.identifier.UUIDString, characteristic.UUID.UUIDString);
   [self
       dispatchEventWithName:
-          RNCoreBluetoothPeripheralManagerCentralDidSubscribeToCharacteristic
+          RNCoreBluetoothPeripheralManagerCentralDidUnsubscribeFromCharacteristic
                        body:@{
-                         @"central" : [RNCoreBluetoothConvert centralToJs:central],
+                         @"central" :
+                             [RNCoreBluetoothConvert centralToJs:central],
                          @"characteristic" : [RNCoreBluetoothConvert
                              characteristicToJs:characteristic]
                        }];
@@ -261,7 +262,8 @@ RCT_EXPORT_METHOD(addService
   [self dispatchEventWithName:
             RNCoreBluetoothPeripheralManagerDidReceiveReadRequest
                          body:@{
-                           @"request" : [RNCoreBluetoothConvert requestToJs:request]
+                           @"request" :
+                               [RNCoreBluetoothConvert requestToJs:request]
                          }];
 }
 

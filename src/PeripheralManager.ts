@@ -5,6 +5,8 @@ import {
   PeripheralManagerDidUpdateStateEvent,
   CBCharacteristicProperty,
   CBAttributePermission,
+  PeripheralManagerCentralDidSubscribeToCharacteristic,
+  PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
 } from './CoreBluetooth';
 import * as Base64 from 'base64-js';
 
@@ -17,6 +19,10 @@ export interface IEventSubscription {
 
 export interface IStateChangeListener {
   (state: ManagerState): void;
+}
+
+export interface ICharacteristicSubscriberListener {
+  (central: Central, serviceUUID: string, characteristicUUID: string): void;
 }
 
 export type PeripheralManagerOptions = {
@@ -117,6 +123,48 @@ export class PeripheralManager {
     );
 
     return subscription;
+  }
+  onSubscribeToCharacteristic(
+    listener: ICharacteristicSubscriberListener
+  ): IEventSubscription {
+    return this.#emitter.addListener(
+      PeripheralManagerCentralDidSubscribeToCharacteristic,
+      (event) => {
+        console.debug(
+          'Event',
+          PeripheralManagerCentralDidSubscribeToCharacteristic,
+          'received with',
+          event
+        );
+
+        const central = Central.fromNative(event.central);
+        const serviceUUID = event.characteristic.serviceUUID;
+        const characteristicUUID = event.characteristic.UUID;
+
+        listener(central, serviceUUID, characteristicUUID);
+      }
+    );
+  }
+  onUnsubscribeFromCharacteristic(
+    listener: ICharacteristicSubscriberListener
+  ): IEventSubscription {
+    return this.#emitter.addListener(
+      PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+      (event) => {
+        console.debug(
+          'Event',
+          PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+          'received with',
+          event
+        );
+
+        const central = Central.fromNative(event.central);
+        const serviceUUID = event.characteristic.serviceUUID;
+        const characteristicUUID = event.characteristic.UUID;
+
+        listener(central, serviceUUID, characteristicUUID);
+      }
+    );
   }
 
   /**
@@ -270,11 +318,26 @@ function AttributePermissionToCBAttributePermission(
   }
 }
 
+export class Peer {
+  #identifier: string;
+
+  constructor(uuid: string) {
+    this.#identifier = uuid;
+  }
+
+  /**
+   * The UUID associated with the peer.
+   */
+  get identifier(): string {
+    return this.#identifier;
+  }
+}
+
 export class Attribute {
   #uuid: string;
 
-  constructor(uuid: string) {
-    this.#uuid = uuid;
+  constructor(identifier: string) {
+    this.#uuid = identifier;
   }
 
   /**
@@ -282,6 +345,33 @@ export class Attribute {
    */
   get UUID(): string {
     return this.#uuid;
+  }
+}
+
+export class Central extends Peer {
+  #maximumUpdateValueLength: number;
+
+  static fromNative({
+    identifier,
+    maximumUpdateValueLength,
+  }: {
+    identifier: string;
+    maximumUpdateValueLength: number;
+  }): Central {
+    return new Central(identifier, maximumUpdateValueLength);
+  }
+
+  constructor(identifier: string, maximumUpdateValueLength: number) {
+    super(identifier);
+    this.#maximumUpdateValueLength = maximumUpdateValueLength;
+  }
+
+  /**
+   * The maximum amount of data, in bytes, that the central can receive in
+   * a single notification or indication.
+   */
+  get maximumUpdateValueLength(): number {
+    return this.#maximumUpdateValueLength;
   }
 }
 
