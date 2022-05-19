@@ -1,6 +1,6 @@
 {
   "name": "react-native-core-bluetooth",
-  "version": "0.1.2",
+  "version": "0.1.6",
   "description": "React Native native module for accessing the Core Bluetooth framework on iOS.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -14,6 +14,7 @@
     "ios",
     "cpp",
     "react-native-core-bluetooth.podspec",
+    "app.plugin.js",
     "!lib/typescript/example",
     "!android/build",
     "!ios/build",
@@ -29,7 +30,8 @@
     "release": "release-it",
     "example": "yarn --cwd example",
     "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "bootstrap": "yarn example && yarn && yarn pods",
+    "clean": "watchman watch-del-all && yarn cache clean && rm -rf example/ios/build"
   },
   "keywords": [
     "react-native",
@@ -48,11 +50,12 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^11.0.0",
+    "@expo/config-plugins": "^4.1.5",
     "@react-native-community/eslint-config": "^2.0.0",
     "@release-it/conventional-changelog": "^2.0.0",
     "@types/jest": "^26.0.0",
-    "@types/react": "^16.9.19",
-    "@types/react-native": "0.62.13",
+    "@types/react": "^17.0.2",
+    "@types/react-native": "0.67.7",
     "commitlint": "^11.0.0",
     "eslint": "^7.2.0",
     "eslint-config-prettier": "^7.0.0",
@@ -60,7 +63,7 @@
     "husky": "^6.0.0",
     "jest": "^26.0.1",
     "pod-install": "^0.1.0",
-    "prettier": "^2.0.5",
+    "prettier": "^2.6.2",
     "react": "17.0.2",
     "react-native": "0.68.2",
     "react-native-builder-bob": "^0.18.0",
@@ -143,5 +146,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "base64-js": "^1.5.1"
   }
 }
