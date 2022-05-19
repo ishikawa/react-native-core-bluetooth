@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark Native -> JS
 
++ (id)dataToJs:(NSData *)data;
 + (id)centralToJs:(CBCentral *)central;
 + (id)serviceToJs:(CBService *)service;
 + (id)characteristicToJs:(CBCharacteristic *)characteristic;

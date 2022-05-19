@@ -87,6 +87,9 @@ static inline id nullableJsValue(id value) {
 }
 
 #pragma mark Native -> JS
++ (id)dataToJs:(NSData *)data {
+  return [data base64EncodedStringWithOptions:0];
+}
 
 + (id)centralToJs:(nonnull CBCentral *)central {
   return @{
@@ -105,7 +108,8 @@ static inline id nullableJsValue(id value) {
 + (id)characteristicToJs:(nonnull CBCharacteristic *)characteristic {
   return @{
     @"id" : characteristic.UUID.UUIDString,
-    @"value" : characteristic.value ? characteristic.value : [NSNull null],
+    @"value" : characteristic.value ? [self dataToJs:characteristic.value]
+                                    : [NSNull null],
     @"service" : [self serviceToJs:characteristic.service]
   };
 }
@@ -115,7 +119,7 @@ static inline id nullableJsValue(id value) {
     @"centralId" : request.central.identifier.UUIDString,
     @"serviceId" : request.characteristic.service.UUID.UUIDString,
     @"characteristicId" : request.characteristic.UUID.UUIDString,
-    @"value" : request.value ? request.value : [NSNull null],
+    @"value" : request.value ? [self dataToJs:request.value] : [NSNull null],
     @"offset" : @(request.offset),
   };
 }
