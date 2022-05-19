@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -15,8 +15,139 @@ import {
   Central,
 } from 'react-native-core-bluetooth';
 
+// @ts-ignore
+// eslint-disable-next-line no-undef
+const utf8encoder = new TextEncoder();
+
 const PERIPHERAL_SERVICE_UUID = 'E20A39F4-73F5-4BC4-A12F-17D1AD07A961';
 const PERIPHERAL_CHARACTERISTIC_UUID = '08590F7E-DB05-467E-8757-72F6FAEB13D4';
+
+const STRING_TO_SEND =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+
+const EOM = utf8encoder.encode('EOM');
+
+class ConnectedCentral {
+  #manager: PeripheralManager;
+
+  #central: Central;
+
+  #characteristicUUID: string;
+
+  #dataToSend: Uint8Array;
+
+  #sendDataIndex = 0;
+
+  #sendingEOM = false;
+
+  constructor(
+    manager: PeripheralManager,
+    central: Central,
+    characteristicUUID: string,
+    dataToSend: Uint8Array,
+  ) {
+    this.#manager = manager;
+    this.#central = central;
+    this.#characteristicUUID = characteristicUUID;
+    this.#dataToSend = dataToSend;
+  }
+
+  get central(): Central {
+    return this.#central;
+  }
+
+  get characteristicUUID(): string {
+    return this.#characteristicUUID;
+  }
+
+  /**
+   *  Sends the next amount of data to the connected central
+   */
+  async sendData() {
+    // First up, check if we're meant to be sending an EOM
+    if (this.#sendingEOM) {
+      const didSend = await this.#manager.updateValue(
+        EOM,
+        this.#characteristicUUID,
+        [this.#central.identifier],
+      );
+      if (didSend) {
+        console.info('Sent: EOM for', this.#central.identifier);
+      }
+      // It didn't send, so we'll exit and wait for peripheralManagerIsReadyToUpdateSubscribers to call sendData again
+      return;
+    }
+
+    // We're not sending an EOM, so we're sending data
+    // Is there any left to send?
+    if (this.#sendDataIndex >= this.#dataToSend.byteLength) {
+      // No data left.  Do nothing
+      return;
+    }
+
+    // There's data left, so send until the callback fails, or we're done.
+    let didSend = true;
+    const mtu = this.#central.maximumUpdateValueLength;
+
+    while (didSend) {
+      // Work out how big it should be
+      const amountToSend = Math.min(
+        this.#dataToSend.byteLength - this.#sendDataIndex,
+        mtu,
+      );
+
+      // Copy out the data we want
+      let chunk = this.#dataToSend.subarray(
+        this.#sendDataIndex,
+        this.#sendDataIndex + amountToSend,
+      );
+
+      // Send it
+      didSend = await this.#manager.updateValue(
+        chunk,
+        this.#characteristicUUID,
+        [this.#central.identifier],
+      );
+
+      // If it didn't work, drop out and wait for the callback
+      if (!didSend) {
+        return;
+      }
+
+      console.debug(
+        'Sent',
+        chunk.byteLength,
+        'bytes for',
+        this.#central.identifier,
+      );
+
+      // It did send, so update our index
+      this.#sendDataIndex += amountToSend;
+
+      // Was it the last one?
+      if (this.#sendDataIndex >= this.#dataToSend.byteLength) {
+        // It was - send an EOM
+
+        // Set this so if the send fails, we'll send it next time
+        this.#sendingEOM = true;
+
+        //Send it
+        const eomSent = await this.#manager.updateValue(
+          EOM,
+          this.#characteristicUUID,
+          [this.#central.identifier],
+        );
+
+        if (eomSent) {
+          // It sent; we're all done
+          this.#sendingEOM = false;
+          console.debug('Sent: EOM');
+        }
+        return;
+      }
+    }
+  }
+}
 
 function setUpService(manager: PeripheralManager) {
   // Build our service.
@@ -42,7 +173,13 @@ export default function App() {
   const [manager] = useState(() => new PeripheralManager());
   const [bleState, setBleState] = useState<ManagerState | undefined>();
   const [isAdvertising, setIsAdvertising] = useState(false);
-  const [subscribers, setSubscribers] = useState<Central[]>([]);
+
+  const [, setUpdate] = useState(0);
+  const subscribersRef = useRef<ConnectedCentral[]>([]);
+
+  const rerender = useCallback(() => {
+    setUpdate((n) => n + 1);
+  }, []);
 
   // Subscribe state change
   useEffect(() => {
@@ -61,7 +198,17 @@ export default function App() {
           serviceUUID,
         );
 
-        setSubscribers((prevSubscribers) => [...prevSubscribers, central]);
+        const dataToSend = utf8encoder.encode(STRING_TO_SEND);
+        const connectedCentral = new ConnectedCentral(
+          manager,
+          central,
+          characteristicUUID,
+          dataToSend,
+        );
+
+        connectedCentral.sendData();
+        subscribersRef.current.push(connectedCentral);
+        rerender();
       },
     );
     const subscription3 = manager.onUnsubscribeFromCharacteristic(
@@ -74,19 +221,27 @@ export default function App() {
           serviceUUID,
         );
 
-        setSubscribers((prevSubscribers) =>
-          prevSubscribers.filter((c) => c.identifier !== central.identifier),
+        subscribersRef.current = subscribersRef.current.filter(
+          (c) => c.central.identifier !== central.identifier,
         );
+        rerender();
       },
     );
+    const subscription4 = manager.onReadyToUpdateSubscribers(() => {
+      // Start sending again
+      for (const c of subscribersRef.current) {
+        c.sendData();
+      }
+    });
 
     return function unsubscribe() {
       console.debug('Remove subscription...');
       subscription1.remove();
       subscription2.remove();
       subscription3.remove();
+      subscription4.remove();
     };
-  }, [manager]);
+  }, [manager, rerender]);
 
   // Initialize BLE state in UI
   useEffect(() => {
@@ -149,9 +304,9 @@ export default function App() {
       </View>
       <View style={styles.row}>
         <Text style={{ fontWeight: 'bold' }}>Connected subscribers</Text>
-        {subscribers.map((central) => (
-          <Text key={central.identifier}>
-            {central.identifier} ({central.maximumUpdateValueLength})
+        {subscribersRef.current.map((c) => (
+          <Text key={c.central.identifier}>
+            {c.central.identifier} ({c.central.maximumUpdateValueLength})
           </Text>
         ))}
       </View>
