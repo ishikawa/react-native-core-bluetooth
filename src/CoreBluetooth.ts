@@ -20,10 +20,12 @@ export const {
   PeripheralManagerDidUpdateStateEvent,
   PeripheralManagerCentralDidSubscribeToCharacteristic,
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+  PeripheralManagerIsReadyToUpdateSubscribers,
 }: {
   PeripheralManagerDidUpdateStateEvent: string;
   PeripheralManagerCentralDidSubscribeToCharacteristic: string;
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic: string;
+  PeripheralManagerIsReadyToUpdateSubscribers: string;
 } = CoreBluetoothModule.getConstants();
 
 export const CBManagerState = {

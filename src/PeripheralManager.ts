@@ -7,6 +7,7 @@ import {
   CBAttributePermission,
   PeripheralManagerCentralDidSubscribeToCharacteristic,
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
+  PeripheralManagerIsReadyToUpdateSubscribers,
 } from './CoreBluetooth';
 import * as Base64 from 'base64-js';
 
@@ -124,6 +125,7 @@ export class PeripheralManager {
 
     return subscription;
   }
+
   onSubscribeToCharacteristic(
     listener: ICharacteristicSubscriberListener
   ): IEventSubscription {
@@ -145,6 +147,7 @@ export class PeripheralManager {
       }
     );
   }
+
   onUnsubscribeFromCharacteristic(
     listener: ICharacteristicSubscriberListener
   ): IEventSubscription {
@@ -163,6 +166,21 @@ export class PeripheralManager {
         const characteristicUUID = event.characteristic.UUID;
 
         listener(central, serviceUUID, characteristicUUID);
+      }
+    );
+  }
+
+  onReadyToUpdateSubscribers(listener: () => void): IEventSubscription {
+    return this.#emitter.addListener(
+      PeripheralManagerIsReadyToUpdateSubscribers,
+      (event) => {
+        console.debug(
+          'Event',
+          PeripheralManagerIsReadyToUpdateSubscribers,
+          'received with',
+          event
+        );
+        listener();
       }
     );
   }
