@@ -1,1 +1,5 @@
-it.todo('write a test');
+import { PeripheralManager } from '../PeripheralManager';
+
+it('import should not raise linking error', () => {
+  expect(PeripheralManager).toBeDefined();
+});
