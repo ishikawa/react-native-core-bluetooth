@@ -6,4 +6,8 @@ export {
   Central,
   Peer,
   Attribute,
+  IStateChangeListener,
+  ICharacteristicSubscriberListener,
+  IEventSubscription,
+  AdvertisingOptions,
 } from './PeripheralManager';
