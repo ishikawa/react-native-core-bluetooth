@@ -26,6 +26,9 @@ static NSString *const RNCoreBluetoothPeripheralManagerDidReceiveReadRequest =
 static NSString *const RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests =
     @"onPeripheralManagerDidReceiveWriteRequests";
 
+static NSString *const RNCoreBluetoothPeripheralManagerDidStartAdvertising =
+    @"onPeripheralManagerDidStartAdvertising";
+
 @interface RNCoreBluetooth (CBPeripheralManagerDelegate) <
     CBPeripheralManagerDelegate>
 @end
@@ -214,7 +217,9 @@ RCT_EXPORT_METHOD(updateValue
     @"PeripheralManagerDidReceiveReadRequest" :
         RNCoreBluetoothPeripheralManagerDidReceiveReadRequest,
     @"PeripheralManagerDidReceiveWriteRequests" :
-        RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests
+        RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests,
+    @"PeripheralManagerDidStartAdvertising" :
+        RNCoreBluetoothPeripheralManagerDidStartAdvertising,
   };
 }
 
@@ -228,6 +233,7 @@ RCT_EXPORT_METHOD(updateValue
     RNCoreBluetoothPeripheralManagerIsReadyToUpdateSubscribers,
     RNCoreBluetoothPeripheralManagerDidReceiveReadRequest,
     RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests,
+    RNCoreBluetoothPeripheralManagerDidStartAdvertising,
   ];
 }
 
@@ -346,8 +352,19 @@ RCT_EXPORT_METHOD(updateValue
   NSLog(@"peripheralManager:didReceiveWriteRequests: (%lu req)",
         (unsigned long)requests.count);
   [self dispatchEventWithName:
-            RNCoreBluetoothPeripheralManagerDidReceiveReadRequest
+            RNCoreBluetoothPeripheralManagerDidReceiveWriteRequests
                          body:@{@"requests" : jsonRequests}];
 }
 
+- (void)peripheralManagerDidStartAdvertising:(CBPeripheralManager *)peripheral
+                                       error:(NSError *)error {
+  NSLog(@"peripheralManagerDidStartAdvertising:error: %@", error);
+  [self
+      dispatchEventWithName:RNCoreBluetoothPeripheralManagerDidStartAdvertising
+                       body:@{
+                         @"error" : (error != nil ? [RNCoreBluetoothConvert
+                                                        errorToJs:error]
+                                                  : [NSNull null])
+                       }];
+}
 @end

@@ -233,6 +233,9 @@ export default function App() {
         c.sendData();
       }
     });
+    const subscription5 = manager.onStartAdvertising((error) => {
+      console.info('Start advertising: error =', error);
+    });
 
     return function unsubscribe() {
       console.debug('Remove subscription...');
@@ -240,6 +243,7 @@ export default function App() {
       subscription2.remove();
       subscription3.remove();
       subscription4.remove();
+      subscription5.remove();
     };
   }, [manager, rerender]);
 

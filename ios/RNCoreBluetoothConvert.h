@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (id)serviceToJs:(CBService *)service;
 + (id)characteristicToJs:(CBCharacteristic *)characteristic;
 + (id)requestToJs:(CBATTRequest *)request;
++ (id)errorToJs:(nonnull NSError *)error;
 @end
 
 NS_ASSUME_NONNULL_END

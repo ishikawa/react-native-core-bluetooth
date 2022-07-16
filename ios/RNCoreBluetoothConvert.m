@@ -127,4 +127,12 @@ static inline id nullableJsValue(id value) {
     @"offset" : @(request.offset),
   };
 }
+
++ (id)errorToJs:(nonnull NSError *)error {
+  return @{
+    @"code" : @(error.code),
+    @"domain" : error.domain,
+    @"description" : error.localizedDescription,
+  };
+}
 @end

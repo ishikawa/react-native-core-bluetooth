@@ -8,8 +8,15 @@ import {
   PeripheralManagerCentralDidSubscribeToCharacteristic,
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
   PeripheralManagerIsReadyToUpdateSubscribers,
+  PeripheralManagerDidStartAdvertising,
 } from './CoreBluetooth';
 import * as Base64 from 'base64-js';
+
+export interface INativeError {
+  code: number;
+  domain: string;
+  description: string;
+}
 
 export interface IEventSubscription {
   /**
@@ -24,6 +31,10 @@ export interface IStateChangeListener {
 
 export interface ICharacteristicSubscriberListener {
   (central: Central, serviceUUID: string, characteristicUUID: string): void;
+}
+
+export interface IStartAdvertisingListener {
+  (error: INativeError | null): void;
 }
 
 export type PeripheralManagerOptions = {
@@ -112,12 +123,6 @@ export class PeripheralManager {
     const subscription = this.#emitter.addListener(
       PeripheralManagerDidUpdateStateEvent,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerDidUpdateStateEvent,
-          'received with',
-          event
-        );
         const state = CBManagerStateToManagerState(event.state);
         listener(state);
       }
@@ -132,13 +137,6 @@ export class PeripheralManager {
     return this.#emitter.addListener(
       PeripheralManagerCentralDidSubscribeToCharacteristic,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerCentralDidSubscribeToCharacteristic,
-          'received with',
-          event
-        );
-
         const central = Central.fromNative(event.central);
         const serviceUUID = event.characteristic.serviceUUID;
         const characteristicUUID = event.characteristic.UUID;
@@ -154,13 +152,6 @@ export class PeripheralManager {
     return this.#emitter.addListener(
       PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
-          'received with',
-          event
-        );
-
         const central = Central.fromNative(event.central);
         const serviceUUID = event.characteristic.serviceUUID;
         const characteristicUUID = event.characteristic.UUID;
@@ -173,14 +164,17 @@ export class PeripheralManager {
   onReadyToUpdateSubscribers(listener: () => void): IEventSubscription {
     return this.#emitter.addListener(
       PeripheralManagerIsReadyToUpdateSubscribers,
-      (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerIsReadyToUpdateSubscribers,
-          'received with',
-          event
-        );
+      () => {
         listener();
+      }
+    );
+  }
+
+  onStartAdvertising(listener: IStartAdvertisingListener): IEventSubscription {
+    return this.#emitter.addListener(
+      PeripheralManagerDidStartAdvertising,
+      (event) => {
+        listener(event.error);
       }
     );
   }
