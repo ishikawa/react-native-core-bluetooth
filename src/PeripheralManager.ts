@@ -123,12 +123,6 @@ export class PeripheralManager {
     const subscription = this.#emitter.addListener(
       PeripheralManagerDidUpdateStateEvent,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerDidUpdateStateEvent,
-          'received with',
-          event
-        );
         const state = CBManagerStateToManagerState(event.state);
         listener(state);
       }
@@ -143,13 +137,6 @@ export class PeripheralManager {
     return this.#emitter.addListener(
       PeripheralManagerCentralDidSubscribeToCharacteristic,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerCentralDidSubscribeToCharacteristic,
-          'received with',
-          event
-        );
-
         const central = Central.fromNative(event.central);
         const serviceUUID = event.characteristic.serviceUUID;
         const characteristicUUID = event.characteristic.UUID;
@@ -165,13 +152,6 @@ export class PeripheralManager {
     return this.#emitter.addListener(
       PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
-          'received with',
-          event
-        );
-
         const central = Central.fromNative(event.central);
         const serviceUUID = event.characteristic.serviceUUID;
         const characteristicUUID = event.characteristic.UUID;
@@ -184,13 +164,7 @@ export class PeripheralManager {
   onReadyToUpdateSubscribers(listener: () => void): IEventSubscription {
     return this.#emitter.addListener(
       PeripheralManagerIsReadyToUpdateSubscribers,
-      (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerIsReadyToUpdateSubscribers,
-          'received with',
-          event
-        );
+      () => {
         listener();
       }
     );
@@ -200,12 +174,6 @@ export class PeripheralManager {
     return this.#emitter.addListener(
       PeripheralManagerDidStartAdvertising,
       (event) => {
-        console.debug(
-          'Event',
-          PeripheralManagerDidStartAdvertising,
-          'received with',
-          event
-        );
         listener(event.error);
       }
     );
