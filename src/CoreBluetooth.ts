@@ -16,18 +16,18 @@ const CoreBluetoothModule = NativeModules.CoreBluetooth
       }
     );
 
-// We don't mirror constants by using `getConstants()` so that it will not
-// cause LinkingError when the module is imported.
 export const {
   PeripheralManagerDidUpdateStateEvent,
   PeripheralManagerCentralDidSubscribeToCharacteristic,
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
   PeripheralManagerIsReadyToUpdateSubscribers,
+  PeripheralManagerDidStartAdvertising,
 }: {
   PeripheralManagerDidUpdateStateEvent: string;
   PeripheralManagerCentralDidSubscribeToCharacteristic: string;
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic: string;
   PeripheralManagerIsReadyToUpdateSubscribers: string;
+  PeripheralManagerDidStartAdvertising: string;
 } = NativeModules.CoreBluetooth
   ? NativeModules.CoreBluetooth.getConstants()
   : // We dot't raise a linking error here so that the module can be mocked.
@@ -36,6 +36,7 @@ export const {
       PeripheralManagerCentralDidSubscribeToCharacteristic: '',
       PeripheralManagerCentralDidUnsubscribeFromCharacteristic: '',
       PeripheralManagerIsReadyToUpdateSubscribers: '',
+      PeripheralManagerDidStartAdvertising: '',
     };
 
 export const CBManagerState = {

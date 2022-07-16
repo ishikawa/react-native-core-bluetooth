@@ -8,8 +8,15 @@ import {
   PeripheralManagerCentralDidSubscribeToCharacteristic,
   PeripheralManagerCentralDidUnsubscribeFromCharacteristic,
   PeripheralManagerIsReadyToUpdateSubscribers,
+  PeripheralManagerDidStartAdvertising,
 } from './CoreBluetooth';
 import * as Base64 from 'base64-js';
+
+export interface INativeError {
+  code: number;
+  domain: string;
+  description: string;
+}
 
 export interface IEventSubscription {
   /**
@@ -24,6 +31,10 @@ export interface IStateChangeListener {
 
 export interface ICharacteristicSubscriberListener {
   (central: Central, serviceUUID: string, characteristicUUID: string): void;
+}
+
+export interface IStartAdvertisingListener {
+  (error: INativeError | null): void;
 }
 
 export type PeripheralManagerOptions = {
@@ -181,6 +192,21 @@ export class PeripheralManager {
           event
         );
         listener();
+      }
+    );
+  }
+
+  onStartAdvertising(listener: IStartAdvertisingListener): IEventSubscription {
+    return this.#emitter.addListener(
+      PeripheralManagerDidStartAdvertising,
+      (event) => {
+        console.debug(
+          'Event',
+          PeripheralManagerDidStartAdvertising,
+          'received with',
+          event
+        );
+        listener(event.error);
       }
     );
   }
